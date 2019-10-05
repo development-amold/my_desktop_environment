@@ -1,0 +1,29 @@
+version: '3'
+services:
+  db:
+    image: postgres
+    volumes:
+      - ./tmp/db:/var/lib/postgresql/data
+  backend:
+    build: .
+    entrypoint: ./backend/backend_entrypoint.sh
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"    
+    volumes:
+      - ./backend:/myapps/backend/myrailsapi
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+  frontend:
+    build: .
+    entrypoint: ./frontend/frontend_entrypoint.sh
+    # image: "node:10-alpine"
+    # user: "node"
+    working_dir: /myapps/frontend/my_react_app
+    volumes:
+      - ./frontend:/myapp/frontend/my_react_app
+    ports:
+      - "3001:3001"
+    command: "npm start"
+    depends_on:
+      - backend
